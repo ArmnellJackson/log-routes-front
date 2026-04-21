@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\armne\\\\OneDrive\\\\Escritorio\\\\proyectos\\\\1demosPorfolio\\\\LogicRoutes\\\\front-logic-routes\" | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name)",
+      "Bash(grep -E \"^react$|^@astrojs\")",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(pnpm add *)",
+      "Bash(pnpm astro *)"
+    ]
+  }
+}

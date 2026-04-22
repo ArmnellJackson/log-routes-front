@@ -34,7 +34,7 @@ export function Navbar() {
   const close = React.useCallback(() => setIsOpen(false), []);
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="relative z-50 w-full">
       {/* ── Barra principal ── */}
       <nav className="relative flex h-16 items-center justify-between px-6 md:px-12 bg-[#515763]/70 backdrop-blur-md border-b border-white/10">
 

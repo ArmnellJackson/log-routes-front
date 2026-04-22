@@ -2,7 +2,7 @@
 /* Hero principal — pantalla completa sin scroll, tipografía centrada con animaciones */
 ---
 
-<section class="relative flex-1 flex items-center justify-center overflow-hidden">
+<section class="relative flex items-center justify-center overflow-y-auto overflow-x-hidden py-6">
 
   <!-- Patrón de fondo: grid de rutas (red de nodos) -->
   <div class="absolute inset-0 opacity-[0.06]" aria-hidden="true">
@@ -19,13 +19,13 @@
   <!-- Resplandor de acento naranja centrado (clamp para no desbordar en mobile) -->
   <div
     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff5e00]/12 blur-[100px] pointer-events-none"
-    style="width: clamp(280px, 70vw, 700px); height: clamp(200px, 50vw, 500px);"
+    style="width: clamp(200px, 60vw, 600px); height: clamp(150px, 40vw, 400px);"
     aria-hidden="true"
   />
 
   <!-- Destello secundario derecha (oculto en mobile para ahorrar render) -->
   <div
-    class="hidden sm:block absolute top-0 right-0 w-96 h-96 rounded-full bg-[#ff5e00]/6 blur-[100px] pointer-events-none"
+    class="hidden sm:block absolute top-0 right-0 w-72 h-72 rounded-full bg-[#ff5e00]/6 blur-[100px] pointer-events-none"
     aria-hidden="true"
   />
 
@@ -34,18 +34,18 @@
 
     <!-- Eyebrow -->
     <p
-      class="hero-fade-up text-xs md:text-sm font-bold tracking-[0.35em] text-[#ff5e00] uppercase mb-5 md:mb-6"
+      class="hero-fade-up text-xs md:text-sm font-bold tracking-[0.35em] text-[#ff5e00] uppercase mb-4"
       style="animation-delay: 0.1s;"
     >
       Plataforma de gestión de rutas
     </p>
 
-    <!-- Título principal: Bebas Neue, fluid type -->
+    <!-- Título principal: Bebas Neue, fluid type ajustado para caber en viewport -->
     <h1
-      class="hero-fade-up text-white leading-none mb-6 md:mb-8"
+      class="hero-fade-up text-white leading-none mb-5 md:mb-6"
       style="
         font-family: var(--font-display);
-        font-size: clamp(4.5rem, 13vw, 11rem);
+        font-size: clamp(2.5rem, 7vw, 7rem);
         letter-spacing: 0.04em;
         animation-delay: 0.25s;
       "
@@ -57,7 +57,7 @@
 
     <!-- Subtítulo: Smooch Sans -->
     <p
-      class="hero-fade-up text-base md:text-xl text-white/65 max-w-xl mx-auto mb-10 md:mb-12 leading-relaxed"
+      class="hero-fade-up text-base md:text-lg text-white/65 max-w-xl mx-auto mb-8 md:mb-10 leading-relaxed"
       style="font-family: var(--font-sans); animation-delay: 0.45s;"
     >
       Optimiza, planifica y gestiona tus rutas con inteligencia.

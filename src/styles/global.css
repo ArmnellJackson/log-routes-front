@@ -102,6 +102,15 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+  }
+  /* astro-island es el wrapper que genera <Navbar client:load /> —
+     display:contents lo hace transparente para el grid del body */
+  astro-island {
+    display: contents;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);

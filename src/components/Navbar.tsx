@@ -1,13 +1,20 @@
 /* Navbar translúcida con menú hamburguesa para móvil — React para estado interactivo.
-   Incluye AuthDialog para login/registro/recuperar contraseña al pulsar el icono de usuario. */
+   Incluye AuthDialog y soporte de navegación por vistas vía onNavigate. */
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { AuthDialog } from "@/components/AuthDialog";
 
-const NAV_LINKS = [
-  { label: "Home",     href: "/" },
-  { label: "Tutorial", href: "#tutorial" },
-  { label: "Precios",  href: "#precios" },
+export type PageView = "home" | "pricing";
+
+export interface NavbarProps {
+  currentView?: PageView;
+  onNavigate?: (view: PageView) => void;
+}
+
+const NAV_LINKS: { label: string; href: string; view?: PageView }[] = [
+  { label: "Home",     href: "/",         view: "home" },
+  { label: "Tutorial", href: "#tutorial"              },
+  { label: "Precios",  href: "#precios",  view: "pricing" },
 ];
 
 function UserIcon() {
@@ -30,17 +37,29 @@ function UserIcon() {
   );
 }
 
-export function Navbar() {
+export function Navbar({ currentView, onNavigate }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [authOpen, setAuthOpen] = React.useState(false);
 
   const close = React.useCallback(() => setIsOpen(false), []);
 
-  /* Abre el dialog y cierra el menú móvil si estaba abierto */
+  /* Abre el dialog de auth y cierra el menú móvil si estaba abierto */
   const openAuth = React.useCallback(() => {
     setIsOpen(false);
     setAuthOpen(true);
   }, []);
+
+  /* Maneja clicks en links de navegación por vista */
+  const handleNavClick = React.useCallback(
+    (e: React.MouseEvent, view?: PageView) => {
+      if (view && onNavigate) {
+        e.preventDefault();
+        onNavigate(view);
+        setIsOpen(false);
+      }
+    },
+    [onNavigate]
+  );
 
   return (
     <header className="relative z-50 w-full">
@@ -48,7 +67,12 @@ export function Navbar() {
       <nav className="relative flex h-12 sm:h-11 items-center justify-between px-6 md:px-12 bg-[#515763]/70 backdrop-blur-md border-b border-white/10">
 
         {/* Logo — izquierda */}
-        <a href="/" className="shrink-0 flex items-center" aria-label="LogicRoutes — inicio">
+        <a
+          href="/"
+          onClick={(e) => handleNavClick(e, "home")}
+          className="shrink-0 flex items-center"
+          aria-label="LogicRoutes — inicio"
+        >
           <span
             className="text-2xl tracking-widest text-white"
             style={{ fontFamily: "var(--font-display)" }}
@@ -62,11 +86,17 @@ export function Navbar() {
           className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2"
           role="list"
         >
-          {NAV_LINKS.map(({ label, href }) => (
+          {NAV_LINKS.map(({ label, href, view }) => (
             <li key={label}>
               <a
                 href={href}
-                className="text-sm font-semibold tracking-wide text-white/75 hover:text-[#ff5e00] transition-colors duration-200"
+                onClick={(e) => handleNavClick(e, view)}
+                className={cn(
+                  "text-sm font-semibold tracking-wide transition-colors duration-200",
+                  currentView === view && view
+                    ? "text-[#ff5e00]"
+                    : "text-white/75 hover:text-[#ff5e00]"
+                )}
                 style={{ fontFamily: "var(--font-sans)" }}
               >
                 {label}
@@ -123,19 +153,24 @@ export function Navbar() {
         aria-hidden={!isOpen}
       >
         <ul className="flex flex-col px-6 py-3">
-          {NAV_LINKS.map(({ label, href }) => (
+          {NAV_LINKS.map(({ label, href, view }) => (
             <li key={label} className="border-b border-white/8 last:border-0">
               <a
                 href={href}
-                onClick={close}
-                className="block py-3.5 text-base font-semibold text-white/80 hover:text-[#ff5e00] transition-colors"
+                onClick={(e) => { handleNavClick(e, view); close(); }}
+                className={cn(
+                  "block py-3.5 text-base font-semibold transition-colors",
+                  currentView === view && view
+                    ? "text-[#ff5e00]"
+                    : "text-white/80 hover:text-[#ff5e00]"
+                )}
                 style={{ fontFamily: "var(--font-sans)" }}
               >
                 {label}
               </a>
             </li>
           ))}
-          {/* Login en menú móvil — abre el dialog */}
+          {/* Login en menú móvil */}
           <li className="pt-4 pb-2">
             <button
               type="button"

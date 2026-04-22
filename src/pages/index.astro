@@ -1,13 +1,11 @@
 ---
-/* Página principal — ensambla Navbar, Hero y Footer sin scroll */
+/* Página principal — PageContent gestiona el estado de vista (home / pricing) */
 import Layout from '@/layouts/Layout.astro';
-import { Navbar } from '@/components/Navbar';
-import Hero from '@/components/Hero.astro';
+import { PageContent } from '@/components/PageContent';
 import Footer from '@/components/Footer.astro';
 ---
 
 <Layout>
-  <Navbar client:load />
-  <Hero />
+  <PageContent client:load />
   <Footer />
 </Layout>

@@ -36,7 +36,7 @@ export function Navbar() {
   return (
     <header className="relative z-50 w-full">
       {/* ── Barra principal ── */}
-      <nav className="relative flex h-16 items-center justify-between px-6 md:px-12 bg-[#515763]/70 backdrop-blur-md border-b border-white/10">
+      <nav className="relative flex h-12 sm:h-11 items-center justify-between px-6 md:px-12 bg-[#515763]/70 backdrop-blur-md border-b border-white/10">
 
         {/* Logo — izquierda */}
         <a href="/" className="shrink-0 flex items-center" aria-label="LogicRoutes — inicio">
@@ -103,11 +103,11 @@ export function Navbar() {
         </button>
       </nav>
 
-      {/* ── Menú móvil ── */}
+      {/* ── Menú móvil — absoluto para no desplazar el hero ── */}
       <div
         id="mobile-menu"
         className={cn(
-          "md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-[#464d5a]/97 backdrop-blur-md border-b border-white/10",
+          "md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 ease-in-out bg-[#464d5a]/97 backdrop-blur-md border-b border-white/10",
           isOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
         )}
         aria-hidden={!isOpen}

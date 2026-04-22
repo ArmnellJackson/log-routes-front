@@ -10,7 +10,10 @@
       "Bash(pnpm dev *)",
       "Bash(netstat -ano)",
       "Bash(taskkill *)",
-      "PowerShell(Stop-Process *)"
+      "PowerShell(Stop-Process *)",
+      "Bash(pnpm dlx *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm exec *)"
     ]
   }
 }

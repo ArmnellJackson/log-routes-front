@@ -1,6 +1,8 @@
-/* Navbar translúcida con menú hamburguesa para móvil — React para estado interactivo */
+/* Navbar translúcida con menú hamburguesa para móvil — React para estado interactivo.
+   Incluye AuthDialog para login/registro/recuperar contraseña al pulsar el icono de usuario. */
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { AuthDialog } from "@/components/AuthDialog";
 
 const NAV_LINKS = [
   { label: "Home",     href: "/" },
@@ -30,8 +32,15 @@ function UserIcon() {
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [authOpen, setAuthOpen] = React.useState(false);
 
   const close = React.useCallback(() => setIsOpen(false), []);
+
+  /* Abre el dialog y cierra el menú móvil si estaba abierto */
+  const openAuth = React.useCallback(() => {
+    setIsOpen(false);
+    setAuthOpen(true);
+  }, []);
 
   return (
     <header className="relative z-50 w-full">
@@ -69,6 +78,7 @@ export function Navbar() {
         {/* Login icon — derecha (solo desktop) */}
         <button
           aria-label="Iniciar sesión"
+          onClick={openAuth}
           className="hidden md:flex items-center justify-center w-9 h-9 rounded-full border border-white/20 text-white/70 hover:border-[#ff5e00] hover:text-[#ff5e00] transition-all duration-200 cursor-pointer"
         >
           <UserIcon />
@@ -125,20 +135,23 @@ export function Navbar() {
               </a>
             </li>
           ))}
-          {/* Login en menú móvil */}
+          {/* Login en menú móvil — abre el dialog */}
           <li className="pt-4 pb-2">
-            <a
-              href="#login"
-              onClick={close}
-              className="inline-flex items-center gap-2.5 text-base font-semibold text-white/80 hover:text-[#ff5e00] transition-colors"
+            <button
+              type="button"
+              onClick={openAuth}
+              className="inline-flex items-center gap-2.5 text-base font-semibold text-white/80 hover:text-[#ff5e00] transition-colors cursor-pointer"
               style={{ fontFamily: "var(--font-sans)" }}
             >
               <UserIcon />
               Iniciar sesión
-            </a>
+            </button>
           </li>
         </ul>
       </div>
+
+      {/* ── Dialog de autenticación ── */}
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </header>
   );
 }

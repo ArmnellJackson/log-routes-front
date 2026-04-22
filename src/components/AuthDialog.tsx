@@ -19,6 +19,7 @@ type View = "login" | "register" | "recover";
 export interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLoginSuccess?: () => void;
 }
 
 // ── Vista: Iniciar sesión ──
@@ -26,13 +27,16 @@ export interface AuthDialogProps {
 function LoginView({
   onRegister,
   onRecover,
+  onSuccess,
 }: {
   onRegister: () => void;
   onRecover: () => void;
+  onSuccess?: () => void;
 }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: integrar endpoint de autenticación
+    onSuccess?.();
   };
 
   return (
@@ -239,7 +243,7 @@ function RecoverView({ onLogin }: { onLogin: () => void }) {
 
 // ── Componente principal ──
 
-export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
+export function AuthDialog({ open, onOpenChange, onLoginSuccess }: AuthDialogProps) {
   const [view, setView] = React.useState<View>("login");
 
   /* Resetea la vista al cerrarse para que siempre abra en "login" */
@@ -311,6 +315,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           <LoginView
             onRegister={() => setView("register")}
             onRecover={() => setView("recover")}
+            onSuccess={onLoginSuccess}
           />
         )}
         {view === "register" && (

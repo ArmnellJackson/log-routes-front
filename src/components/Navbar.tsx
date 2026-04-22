@@ -1,20 +1,20 @@
 /* Navbar translúcida con menú hamburguesa para móvil — React para estado interactivo.
-   Incluye AuthDialog y soporte de navegación por vistas vía onNavigate. */
+   Soporte de navegación por vistas (onNavigate) y apertura de auth dialog (onAuthOpen). */
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { AuthDialog } from "@/components/AuthDialog";
 
 export type PageView = "home" | "pricing";
 
 export interface NavbarProps {
   currentView?: PageView;
   onNavigate?: (view: PageView) => void;
+  onAuthOpen?: () => void;
 }
 
 const NAV_LINKS: { label: string; href: string; view?: PageView }[] = [
-  { label: "Home",     href: "/",         view: "home" },
-  { label: "Tutorial", href: "#tutorial"              },
-  { label: "Precios",  href: "#precios",  view: "pricing" },
+  { label: "Home",     href: "/",        view: "home"    },
+  { label: "Tutorial", href: "#tutorial"                 },
+  { label: "Precios",  href: "#precios", view: "pricing" },
 ];
 
 function UserIcon() {
@@ -37,17 +37,10 @@ function UserIcon() {
   );
 }
 
-export function Navbar({ currentView, onNavigate }: NavbarProps) {
+export function Navbar({ currentView, onNavigate, onAuthOpen }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [authOpen, setAuthOpen] = React.useState(false);
 
   const close = React.useCallback(() => setIsOpen(false), []);
-
-  /* Abre el dialog de auth y cierra el menú móvil si estaba abierto */
-  const openAuth = React.useCallback(() => {
-    setIsOpen(false);
-    setAuthOpen(true);
-  }, []);
 
   /* Maneja clicks en links de navegación por vista */
   const handleNavClick = React.useCallback(
@@ -108,7 +101,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
         {/* Login icon — derecha (solo desktop) */}
         <button
           aria-label="Iniciar sesión"
-          onClick={openAuth}
+          onClick={onAuthOpen}
           className="hidden md:flex items-center justify-center w-9 h-9 rounded-full border border-white/20 text-white/70 hover:border-[#ff5e00] hover:text-[#ff5e00] transition-all duration-200 cursor-pointer"
         >
           <UserIcon />
@@ -122,24 +115,9 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
           onClick={() => setIsOpen((v) => !v)}
           className="md:hidden flex flex-col justify-center items-center w-11 h-11 gap-[5px] cursor-pointer -mr-1"
         >
-          <span
-            className={cn(
-              "block h-[2px] w-5 bg-white rounded-full origin-center transition-transform duration-300",
-              isOpen && "translate-y-[7px] rotate-45"
-            )}
-          />
-          <span
-            className={cn(
-              "block h-[2px] w-5 bg-white rounded-full transition-opacity duration-300",
-              isOpen && "opacity-0"
-            )}
-          />
-          <span
-            className={cn(
-              "block h-[2px] w-5 bg-white rounded-full origin-center transition-transform duration-300",
-              isOpen && "-translate-y-[7px] -rotate-45"
-            )}
-          />
+          <span className={cn("block h-[2px] w-5 bg-white rounded-full origin-center transition-transform duration-300", isOpen && "translate-y-[7px] rotate-45")} />
+          <span className={cn("block h-[2px] w-5 bg-white rounded-full transition-opacity duration-300", isOpen && "opacity-0")} />
+          <span className={cn("block h-[2px] w-5 bg-white rounded-full origin-center transition-transform duration-300", isOpen && "-translate-y-[7px] -rotate-45")} />
         </button>
       </nav>
 
@@ -174,7 +152,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
           <li className="pt-4 pb-2">
             <button
               type="button"
-              onClick={openAuth}
+              onClick={() => { close(); onAuthOpen?.(); }}
               className="inline-flex items-center gap-2.5 text-base font-semibold text-white/80 hover:text-[#ff5e00] transition-colors cursor-pointer"
               style={{ fontFamily: "var(--font-sans)" }}
             >
@@ -184,9 +162,6 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
           </li>
         </ul>
       </div>
-
-      {/* ── Dialog de autenticación ── */}
-      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </header>
   );
 }

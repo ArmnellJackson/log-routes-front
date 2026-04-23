@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 
 export default defineConfig({
+  output: 'hybrid',
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

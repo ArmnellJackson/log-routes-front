@@ -273,9 +273,7 @@ export function Dashboard({ onExit }: DashboardProps) {
     setRutaLoading(true);
     try {
       const coords = paradas.map((p) => `${p.lng},${p.lat}`).join(";");
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`,
-      );
+      const res = await fetch(`/api/route?coords=${encodeURIComponent(coords)}`);
       const data = await res.json();
       const geometry: [number, number][] = data.routes[0].geometry.coordinates;
       setRutaGeometry(geometry);

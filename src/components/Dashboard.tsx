@@ -258,7 +258,12 @@ export function Dashboard({ onExit }: DashboardProps) {
 
   const handleRemoveParada = (id: string) => {
     setParadas((prev) => prev.filter((p) => p.id !== id));
-    // Invalida ruta al eliminar una parada
+    setRutaGeometry(null);
+  };
+
+  const handleReorderParadas = (reordered: Parada[]) => {
+    setParadas(reordered);
+    // Reordenar invalida la ruta calculada — hay que reconfirmar
     setRutaGeometry(null);
   };
 
@@ -307,6 +312,7 @@ export function Dashboard({ onExit }: DashboardProps) {
         <ModalRutas
           paradas={paradas}
           onRemoveParada={handleRemoveParada}
+          onReorderParadas={handleReorderParadas}
           onConfirmarRuta={handleConfirmarRuta}
           rutaLoading={rutaLoading}
           onClose={() => setRutaDialogOpen(false)}

@@ -37,11 +37,14 @@ function SelectedPinMarker() {
   );
 }
 
-// ── Marcador de parada agregada — numerado, color verde ──
+// ── Marcador de parada agregada — numerado, verde, detiene propagación al mapa ──
 
-function ParadaMarker({ index }: { index: number }) {
+function ParadaMarker({ index, onClick }: { index: number; onClick: (e: React.MouseEvent) => void }) {
   return (
-    <div className="flex items-center justify-center size-6 rounded-full bg-emerald-500 border-2 border-white shadow-lg text-white text-[0.6rem] font-bold">
+    <div
+      className="flex items-center justify-center size-6 rounded-full bg-emerald-500 border-2 border-white shadow-lg text-white text-[0.6rem] font-bold cursor-pointer"
+      onClick={(e) => { e.stopPropagation(); onClick(e); }}
+    >
       {index + 1}
     </div>
   );
@@ -179,12 +182,14 @@ function MapSearchOverlay({ onSelect }: {
 export interface DashboardHomeProps {
   paradas: Parada[];
   onAgregarParada: (p: Parada) => void;
+  onRemoveParada: (id: string) => void;
   rutaGeometry: [number, number][] | null;
 }
 
-export function DashboardHome({ paradas, onAgregarParada, rutaGeometry }: DashboardHomeProps) {
+export function DashboardHome({ paradas, onAgregarParada, onRemoveParada, rutaGeometry }: DashboardHomeProps) {
   const [userLocation, setUserLocation] = useState<{ longitude: number; latitude: number } | null>(null);
   const [selectedPin, setSelectedPin] = useState<SelectedPin | null>(null);
+  const [selectedParadaId, setSelectedParadaId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
 
   const handleMapClick = async ({ lng, lat }: { lng: number; lat: number }) => {
@@ -236,15 +241,48 @@ export function DashboardHome({ paradas, onAgregarParada, rutaGeometry }: Dashbo
           />
         )}
 
-        {/* Paradas agregadas — marcadores verdes numerados, persisten en sesión */}
-        {paradas.map((parada, i) => (
-          <MapMarker key={parada.id} longitude={parada.lng} latitude={parada.lat}>
-            <MarkerContent>
-              <ParadaMarker index={i} />
-            </MarkerContent>
-            <MarkerTooltip>{parada.label}</MarkerTooltip>
-          </MapMarker>
-        ))}
+        {/* Paradas agregadas — clic muestra popup con info y opción eliminar */}
+        {paradas.map((parada, i) => {
+          const isSelected = selectedParadaId === parada.id;
+          return (
+            <MapMarker key={parada.id} longitude={parada.lng} latitude={parada.lat}>
+              <MarkerContent>
+                <ParadaMarker
+                  index={i}
+                  onClick={() => {
+                    setSelectedPin(null);
+                    setSelectedParadaId(isSelected ? null : parada.id);
+                  }}
+                />
+              </MarkerContent>
+              {!isSelected && <MarkerTooltip>{parada.label}</MarkerTooltip>}
+              {isSelected && (
+                <MapPopup
+                  longitude={parada.lng}
+                  latitude={parada.lat}
+                  closeButton
+                  onClose={() => setSelectedParadaId(null)}
+                  className="min-w-[160px]"
+                >
+                  <div className="space-y-2" style={{ fontFamily: "var(--font-sans)" }}>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold leading-tight">{parada.label}</p>
+                      <p className="text-[0.65rem] font-mono text-muted-foreground">
+                        {parada.lng.toFixed(5)}, {parada.lat.toFixed(5)}
+                      </p>
+                    </div>
+                    <button
+                      className="w-full text-[0.7rem] font-medium py-1 px-2 rounded-md bg-destructive hover:bg-destructive/80 text-white transition-colors"
+                      onClick={() => { onRemoveParada(parada.id); setSelectedParadaId(null); }}
+                    >
+                      Eliminar Parada
+                    </button>
+                  </div>
+                </MapPopup>
+              )}
+            </MapMarker>
+          );
+        })}
 
         {/* Marcador ubicación actual */}
         {userLocation && (

@@ -86,7 +86,7 @@ function SortableParadaItem({
       {/* Eliminar */}
       <button
         onClick={onRemove}
-        className="shrink-0 flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
+        className="shrink-0 flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
         aria-label="Eliminar parada"
       >
         <X className="size-3.5" />

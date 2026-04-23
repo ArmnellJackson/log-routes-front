@@ -300,6 +300,7 @@ export function Dashboard({ onExit }: DashboardProps) {
           <DashboardHome
             paradas={paradas}
             onAgregarParada={handleAgregarParada}
+            onRemoveParada={handleRemoveParada}
             rutaGeometry={rutaGeometry}
           />
         </SidebarInset>

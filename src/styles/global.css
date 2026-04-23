@@ -136,4 +136,16 @@
     font-family: var(--font-display);
     letter-spacing: 0.05em;
   }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+}
+
+/* ── Dashboard sidebar — overlay mode (nunca desplaza el contenido) ── */
+.dashboard-overlay [data-slot="sidebar-gap"] {
+  width: 0 !important;
+  min-width: 0 !important;
 }

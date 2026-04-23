@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { DashboardHome } from "@/components/DashboardHome";
 
 // ── Usuario mock ──
 
@@ -54,6 +55,21 @@ function UserAvatar({ initials }: { initials: string }) {
   );
 }
 
+// ── Backdrop — cierra sidebar al pulsar fuera ──
+
+function SidebarBackdrop() {
+  const { state, toggleSidebar, isMobile, openMobile } = useSidebar();
+  const isOpen = isMobile ? openMobile : state === "expanded";
+  if (!isOpen) return null;
+  return (
+    <div
+      className="absolute inset-0 z-10"
+      onClick={toggleSidebar}
+      aria-hidden="true"
+    />
+  );
+}
+
 // ── Trigger hamburguesa flotante ──
 
 function DashboardTrigger() {
@@ -65,7 +81,12 @@ function DashboardTrigger() {
       type="button"
       onClick={toggleSidebar}
       aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
-      className="flex flex-col justify-center items-center w-9 h-9 gap-[5px] cursor-pointer rounded-md hover:bg-white/5 transition-colors"
+      className="absolute top-3 z-20 flex flex-col justify-center items-center w-9 h-9 gap-[5px] cursor-pointer rounded-md hover:bg-white/5 transition-[left] duration-200 ease-in-out"
+      style={{
+        left: isOpen
+          ? `calc(var(${isMobile ? "--sidebar-width-mobile" : "--sidebar-width"}) + 0.75rem)`
+          : "0.75rem",
+      }}
     >
       <span className={cn("block h-[2px] w-5 bg-white rounded-full origin-center transition-transform duration-300", isOpen && "translate-y-[7px] rotate-45")} />
       <span className={cn("block h-[2px] w-5 bg-white rounded-full transition-opacity duration-300", isOpen && "opacity-0")} />
@@ -176,17 +197,17 @@ export interface DashboardProps {
 export function Dashboard({ onExit }: DashboardProps) {
   return (
     <div className="fixed inset-0 z-50 bg-background">
-      <SidebarProvider defaultOpen={false}>
+      <SidebarProvider defaultOpen={false} className="dashboard-overlay">
         <DashboardSidebar onExit={onExit} />
 
         <SidebarInset className="relative bg-background">
-          {/* Hamburguesa flotante */}
-          <div className="absolute top-3 left-3 z-10">
-            <DashboardTrigger />
-          </div>
+          {/* Hamburguesa flotante — se desplaza con el sidebar */}
+          <DashboardTrigger />
 
-          {/* Body vacío por ahora */}
-          <main className="flex-1" />
+          {/* Backdrop — clic fuera del sidebar lo cierra */}
+          <SidebarBackdrop />
+
+          <DashboardHome />
         </SidebarInset>
       </SidebarProvider>
     </div>

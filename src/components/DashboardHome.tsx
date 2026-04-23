@@ -276,17 +276,25 @@ export function DashboardHome() {
               onClose={() => setSelectedPin(null)}
               className="min-w-[160px]"
             >
-              <div className="space-y-1" style={{ fontFamily: "var(--font-sans)" }}>
-                {selectedPin.loading ? (
-                  <p className="text-xs text-muted-foreground">Obteniendo información…</p>
-                ) : (
-                  <p className="text-xs font-semibold leading-tight">
-                    {selectedPin.label ?? "Ubicación seleccionada"}
+              <div className="space-y-2" style={{ fontFamily: "var(--font-sans)" }}>
+                <div className="space-y-1">
+                  {selectedPin.loading ? (
+                    <p className="text-xs text-muted-foreground">Obteniendo información…</p>
+                  ) : (
+                    <p className="text-xs font-semibold leading-tight">
+                      {selectedPin.label ?? "Ubicación seleccionada"}
+                    </p>
+                  )}
+                  <p className="text-[0.65rem] font-mono text-muted-foreground">
+                    {selectedPin.lng.toFixed(5)}, {selectedPin.lat.toFixed(5)}
                   </p>
-                )}
-                <p className="text-[0.65rem] font-mono text-muted-foreground">
-                  {selectedPin.lng.toFixed(5)}, {selectedPin.lat.toFixed(5)}
-                </p>
+                </div>
+                <button
+                  className="w-full text-[0.7rem] font-medium py-1 px-2 rounded-md bg-[#ff5e00] hover:bg-[#e55500] text-white transition-colors"
+                  onClick={() => {/* TODO: agregar parada */}}
+                >
+                  Agregar Parada
+                </button>
               </div>
             </MapPopup>
           </>

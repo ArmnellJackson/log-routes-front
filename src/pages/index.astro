@@ -6,6 +6,6 @@ import Footer from '@/components/Footer.astro';
 ---
 
 <Layout>
-  <PageContent client:load />
+  <PageContent client:only="react" />
   <Footer />
 </Layout>

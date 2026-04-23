@@ -22,6 +22,13 @@ import "@/styles/global.css";
   </head>
   <!-- h-dvh: viewport dinámico que respeta UI del browser en móvil (iOS Safari) -->
   <body>
+    <!-- Lee el hash antes de que React hidrate y lo persiste en data-view para evitar flash de vista incorrecta -->
+    <script is:inline>
+      (function () {
+        var h = location.hash.slice(1);
+        document.documentElement.dataset.view = ['home','pricing','dashboard'].includes(h) ? h : 'home';
+      })();
+    </script>
     <slot />
   </body>
 </html>

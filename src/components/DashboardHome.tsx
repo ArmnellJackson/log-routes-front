@@ -312,6 +312,7 @@ export function DashboardHome() {
           onSearchToggle={() => setSearchOpen((prev) => !prev)}
         />
       </Map>
+
     </div>
   );
 }

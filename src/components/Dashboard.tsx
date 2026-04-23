@@ -1,5 +1,5 @@
 /* Dashboard principal — pantalla completa (fixed inset-0) que cubre Navbar y Footer.
-   Sidebar shadcn: Header con logo, sección Home, Footer con usuario mock + dropdown de sesión. */
+   Sidebar shadcn: Header con logo, sección Home y Ruta, Footer con usuario mock + dropdown. */
 import * as React from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Logout01Icon, ArrowUpDownIcon } from "@hugeicons/core-free-icons";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { DashboardHome } from "@/components/DashboardHome";
+import { ModalRutas } from "@/components/ModalRutas";
 
 // ── Usuario mock ──
 
@@ -45,6 +46,19 @@ function HomeIcon() {
   );
 }
 
+// ── Icono Ruta ──
+
+function RouteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="6" cy="19" r="2" />
+      <circle cx="18" cy="5" r="2" />
+      <path d="M6 17V9a6 6 0 0 1 6-6h1" />
+      <path d="M18 7v8a6 6 0 0 1-6 6h-1" />
+    </svg>
+  );
+}
+
 // ── Avatar con iniciales ──
 
 function UserAvatar({ initials }: { initials: string }) {
@@ -61,9 +75,10 @@ function SidebarBackdrop() {
   const { state, toggleSidebar, isMobile, openMobile } = useSidebar();
   const isOpen = isMobile ? openMobile : state === "expanded";
   if (!isOpen) return null;
+  // z-[5] — por debajo del Sidebar (z-10 interno) para no interceptar sus clicks
   return (
     <div
-      className="absolute inset-0 z-10"
+      className="absolute inset-0 z-[5]"
       onClick={toggleSidebar}
       aria-hidden="true"
     />
@@ -97,7 +112,14 @@ function DashboardTrigger() {
 
 // ── Sidebar ──
 
-function DashboardSidebar({ onExit }: { onExit: () => void }) {
+function DashboardSidebar({ onExit, onRutaClick }: { onExit: () => void; onRutaClick: () => void }) {
+  const { isMobile, setOpen, setOpenMobile } = useSidebar();
+  const handleRuta = () => {
+    // Cierra sidebar (offcanvas) antes de abrir el modal para evitar conflictos de stacking
+    if (isMobile) setOpenMobile(false);
+    else setOpen(false);
+    onRutaClick();
+  };
   return (
     <Sidebar collapsible="offcanvas">
 
@@ -130,6 +152,15 @@ function DashboardSidebar({ onExit }: { onExit: () => void }) {
                 >
                   <HomeIcon />
                   <span>Home</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleRuta}
+                  style={{ fontFamily: "var(--font-sans)" }}
+                >
+                  <RouteIcon />
+                  <span>Ruta</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -195,10 +226,12 @@ export interface DashboardProps {
 }
 
 export function Dashboard({ onExit }: DashboardProps) {
+  const [rutaDialogOpen, setRutaDialogOpen] = React.useState(false);
+
   return (
     <div className="fixed inset-0 z-50 bg-background">
       <SidebarProvider defaultOpen={false} className="dashboard-overlay">
-        <DashboardSidebar onExit={onExit} />
+        <DashboardSidebar onExit={onExit} onRutaClick={() => setRutaDialogOpen(true)} />
 
         <SidebarInset className="relative bg-background">
           {/* Hamburguesa flotante — se desplaza con el sidebar */}
@@ -210,6 +243,9 @@ export function Dashboard({ onExit }: DashboardProps) {
           <DashboardHome />
         </SidebarInset>
       </SidebarProvider>
+
+      {/* Modal a nivel raíz del Dashboard — evita anidamiento en SidebarInset/Map */}
+      {rutaDialogOpen && <ModalRutas onClose={() => setRutaDialogOpen(false)} />}
     </div>
   );
 }

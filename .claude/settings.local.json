@@ -16,7 +16,9 @@
       "Bash(pnpm exec *)",
       "Bash(node *)",
       "Bash(npx tsc *)",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "WebSearch",
+      "Bash(pkill -f \"astro dev\")"
     ]
   }
 }

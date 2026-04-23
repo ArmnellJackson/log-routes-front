@@ -245,6 +245,10 @@ export function Dashboard({ onExit }: DashboardProps) {
     try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "[]"); } catch { return []; }
   });
 
+  // Geometría de ruta real calculada por OSRM al confirmar
+  const [rutaGeometry, setRutaGeometry] = React.useState<[number, number][] | null>(null);
+  const [rutaLoading, setRutaLoading] = React.useState(false);
+
   React.useEffect(() => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(paradas));
   }, [paradas]);
@@ -252,8 +256,31 @@ export function Dashboard({ onExit }: DashboardProps) {
   const handleAgregarParada = (p: Parada) =>
     setParadas((prev) => [...prev, p]);
 
-  const handleRemoveParada = (id: string) =>
+  const handleRemoveParada = (id: string) => {
     setParadas((prev) => prev.filter((p) => p.id !== id));
+    // Invalida ruta al eliminar una parada
+    setRutaGeometry(null);
+  };
+
+  // Llama OSRM driving route y dibuja la geometría real en el mapa
+  const handleConfirmarRuta = async () => {
+    if (paradas.length < 2) return;
+    setRutaLoading(true);
+    try {
+      const coords = paradas.map((p) => `${p.lng},${p.lat}`).join(";");
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`,
+      );
+      const data = await res.json();
+      const geometry: [number, number][] = data.routes[0].geometry.coordinates;
+      setRutaGeometry(geometry);
+      setRutaDialogOpen(false);
+    } catch {
+      // mantiene estado anterior si falla la red
+    } finally {
+      setRutaLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background">
@@ -267,7 +294,11 @@ export function Dashboard({ onExit }: DashboardProps) {
           {/* Backdrop — clic fuera del sidebar lo cierra */}
           <SidebarBackdrop />
 
-          <DashboardHome paradas={paradas} onAgregarParada={handleAgregarParada} />
+          <DashboardHome
+            paradas={paradas}
+            onAgregarParada={handleAgregarParada}
+            rutaGeometry={rutaGeometry}
+          />
         </SidebarInset>
       </SidebarProvider>
 
@@ -276,6 +307,8 @@ export function Dashboard({ onExit }: DashboardProps) {
         <ModalRutas
           paradas={paradas}
           onRemoveParada={handleRemoveParada}
+          onConfirmarRuta={handleConfirmarRuta}
+          rutaLoading={rutaLoading}
           onClose={() => setRutaDialogOpen(false)}
         />
       )}

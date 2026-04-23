@@ -15,31 +15,6 @@ import {
   useMap,
 } from "@/components/ui/map";
 
-// ── Ruta demo — Lima, Perú ──
-
-const ROUTE: [number, number][] = [
-  [-77.0282, -12.0454], // Lima Centro — Plaza Mayor
-  [-77.0365, -12.0951], // San Isidro
-  [-77.0306, -12.1207], // Miraflores
-  [-77.0213, -12.1451], // Barranco
-];
-
-const STOPS = [
-  { name: "Plaza Mayor",  lng: -77.0282, lat: -12.0454 },
-  { name: "San Isidro",   lng: -77.0365, lat: -12.0951 },
-  { name: "Miraflores",   lng: -77.0306, lat: -12.1207 },
-  { name: "Barranco",     lng: -77.0213, lat: -12.1451 },
-];
-
-// ── Marcador numerado ──
-
-function StopMarker({ index }: { index: number }) {
-  return (
-    <div className="flex items-center justify-center size-6 rounded-full bg-[#ff5e00] border-2 border-white shadow-lg text-white text-[0.6rem] font-bold">
-      {index + 1}
-    </div>
-  );
-}
 
 // ── Marcador de ubicación actual ──
 
@@ -204,9 +179,10 @@ function MapSearchOverlay({ onSelect }: {
 export interface DashboardHomeProps {
   paradas: Parada[];
   onAgregarParada: (p: Parada) => void;
+  rutaGeometry: [number, number][] | null;
 }
 
-export function DashboardHome({ paradas, onAgregarParada }: DashboardHomeProps) {
+export function DashboardHome({ paradas, onAgregarParada, rutaGeometry }: DashboardHomeProps) {
   const [userLocation, setUserLocation] = useState<{ longitude: number; latitude: number } | null>(null);
   const [selectedPin, setSelectedPin] = useState<SelectedPin | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -250,23 +226,15 @@ export function DashboardHome({ paradas, onAgregarParada }: DashboardHomeProps) 
         {/* Captura clics en el mapa */}
         <MapClickHandler onClick={handleMapClick} />
 
-        {/* Ruta naranja LogicRoutes */}
-        <MapRoute
-          coordinates={ROUTE}
-          color="#ff5e00"
-          width={4}
-          opacity={0.85}
-        />
-
-        {/* Paradas con tooltip */}
-        {STOPS.map((stop, i) => (
-          <MapMarker key={stop.name} longitude={stop.lng} latitude={stop.lat}>
-            <MarkerContent>
-              <StopMarker index={i} />
-            </MarkerContent>
-            <MarkerTooltip>{stop.name}</MarkerTooltip>
-          </MapMarker>
-        ))}
+        {/* Ruta real calculada por OSRM — solo se dibuja tras confirmar */}
+        {rutaGeometry && (
+          <MapRoute
+            coordinates={rutaGeometry}
+            color="#ff5e00"
+            width={4}
+            opacity={0.9}
+          />
+        )}
 
         {/* Paradas agregadas — marcadores verdes numerados, persisten en sesión */}
         {paradas.map((parada, i) => (

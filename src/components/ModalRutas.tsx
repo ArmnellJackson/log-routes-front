@@ -1,16 +1,18 @@
 /* ModalRutas — overlay fullscreen para crear/gestionar rutas.
    fixed inset-0 con z alto para superar sidebar, backdrop y trigger del Dashboard.
-   Lista las paradas agregadas desde el mapa; permite eliminarlas individualmente. */
-import { X, MapPin } from "lucide-react";
+   Lista las paradas agregadas desde el mapa; al confirmar dispara fetch OSRM en Dashboard. */
+import { X, Loader2 } from "lucide-react";
 import type { Parada } from "@/components/Dashboard";
 
 export interface ModalRutasProps {
   paradas: Parada[];
   onRemoveParada: (id: string) => void;
+  onConfirmarRuta: () => void;
+  rutaLoading: boolean;
   onClose: () => void;
 }
 
-export function ModalRutas({ paradas, onRemoveParada, onClose }: ModalRutasProps) {
+export function ModalRutas({ paradas, onRemoveParada, onConfirmarRuta, rutaLoading, onClose }: ModalRutasProps) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       {/* Backdrop — clic cierra el panel */}
@@ -84,14 +86,21 @@ export function ModalRutas({ paradas, onRemoveParada, onClose }: ModalRutasProps
           )}
         </div>
 
-        {/* Footer con acción */}
+        {/* Footer con acción — requiere al menos 2 paradas para calcular ruta */}
         {paradas.length > 0 && (
-          <div className="px-4 pb-4 pt-2 border-t border-border">
+          <div className="px-4 pb-4 pt-2 border-t border-border space-y-1.5">
+            {paradas.length < 2 && (
+              <p className="text-[0.65rem] text-center text-muted-foreground">
+                Agrega al menos 2 paradas para calcular la ruta.
+              </p>
+            )}
             <button
-              className="w-full text-xs font-medium py-2 px-3 rounded-lg bg-[#ff5e00] hover:bg-[#e55500] text-white transition-colors"
-              onClick={onClose}
+              disabled={paradas.length < 2 || rutaLoading}
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-medium py-2 px-3 rounded-lg bg-[#ff5e00] hover:bg-[#e55500] disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+              onClick={onConfirmarRuta}
             >
-              Confirmar Ruta
+              {rutaLoading && <Loader2 className="size-3.5 animate-spin" />}
+              {rutaLoading ? "Calculando ruta…" : "Confirmar Ruta"}
             </button>
           </div>
         )}

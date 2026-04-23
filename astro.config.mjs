@@ -1,11 +1,12 @@
 // @ts-check
-// Configuración de Astro — React + Tailwind v4
+// Configuración de Astro — React + Tailwind v4 + Vercel adapter para rutas SSR
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  output: 'hybrid',
+  adapter: vercel(),
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

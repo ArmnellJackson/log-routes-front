@@ -1,5 +1,6 @@
 /* Vista Home del dashboard — mapa interactivo con ruta demo y controles.
    Usa mapcn (MapLibre GL + shadcn) con tema dark y una ruta de ejemplo por Lima. */
+import { useState } from "react";
 import {
   Map,
   MapControls,
@@ -35,9 +36,22 @@ function StopMarker({ index }: { index: number }) {
   );
 }
 
+// ── Marcador de ubicación actual ──
+
+function UserLocationMarker() {
+  return (
+    <div className="relative flex items-center justify-center size-4">
+      <div className="absolute size-4 rounded-full bg-blue-500/30 animate-ping" />
+      <div className="size-3 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
+    </div>
+  );
+}
+
 // ── Componente principal ──
 
 export function DashboardHome() {
+  const [userLocation, setUserLocation] = useState<{ longitude: number; latitude: number } | null>(null);
+
   return (
     <div className="absolute inset-0">
       <Map
@@ -45,6 +59,7 @@ export function DashboardHome() {
         zoom={12}
         theme="dark"
         className="h-full w-full"
+        attributionControl={false}
       >
         {/* Ruta naranja LogicRoutes */}
         <MapRoute
@@ -64,6 +79,16 @@ export function DashboardHome() {
           </MapMarker>
         ))}
 
+        {/* Marcador ubicación actual */}
+        {userLocation && (
+          <MapMarker longitude={userLocation.longitude} latitude={userLocation.latitude}>
+            <MarkerContent>
+              <UserLocationMarker />
+            </MarkerContent>
+            <MarkerTooltip>Mi ubicación</MarkerTooltip>
+          </MapMarker>
+        )}
+
         {/* Controles */}
         <MapControls
           position="bottom-right"
@@ -71,6 +96,7 @@ export function DashboardHome() {
           showCompass
           showLocate
           showFullscreen
+          onLocate={setUserLocation}
         />
       </Map>
     </div>

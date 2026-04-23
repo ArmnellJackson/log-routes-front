@@ -16,7 +16,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
+import { X, Minus, Plus, Locate, Maximize, Loader2, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -725,10 +725,14 @@ type MapControlsProps = {
   showLocate?: boolean;
   /** Show fullscreen toggle button (default: false) */
   showFullscreen?: boolean;
+  /** Show search toggle button (default: false) */
+  showSearch?: boolean;
   /** Additional CSS classes for the controls container */
   className?: string;
   /** Callback with user coordinates when located */
   onLocate?: (coords: { longitude: number; latitude: number }) => void;
+  /** Callback when search button is toggled */
+  onSearchToggle?: () => void;
 };
 
 const positionClasses = {
@@ -782,8 +786,10 @@ function MapControls({
   showCompass = false,
   showLocate = false,
   showFullscreen = false,
+  showSearch = false,
   className,
   onLocate,
+  onSearchToggle,
 }: MapControlsProps) {
   const { map } = useMap();
   const [waitingForLocation, setWaitingForLocation] = useState(false);
@@ -843,6 +849,13 @@ function MapControls({
         className,
       )}
     >
+      {showSearch && (
+        <ControlGroup>
+          <ControlButton onClick={() => onSearchToggle?.()} label="Buscar dirección">
+            <Search className="size-4" />
+          </ControlButton>
+        </ControlGroup>
+      )}
       {showZoom && (
         <ControlGroup>
           <ControlButton onClick={handleZoomIn} label="Zoom in">

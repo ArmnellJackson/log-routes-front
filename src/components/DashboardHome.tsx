@@ -1,6 +1,7 @@
-/* Vista Home del dashboard — mapa interactivo con ruta demo y controles.
-   Selección de punto por clic: reverse geocode Nominatim, marcador pin y popup con info. */
+/* Vista Home del dashboard — mapa interactivo con ruta demo, controles y búsqueda de dirección.
+   Selección por clic o búsqueda Nominatim: marcador pin y popup con nombre de calle y coords. */
 import { useState, useEffect, useRef } from "react";
+import { Search } from "lucide-react";
 import {
   Map,
   MapControls,
@@ -90,11 +91,108 @@ interface SelectedPin {
   loading: boolean;
 }
 
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
+// ── Overlay de búsqueda de dirección sobre el mapa ──
+
+function MapSearchOverlay({ onSelect }: {
+  onSelect: (lng: number, lat: number, label: string) => void;
+}) {
+  const { map } = useMap();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<NominatimResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleChange = (value: string) => {
+    setQuery(value);
+    setShowResults(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (value.trim().length < 3) {
+      setResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5`,
+          { headers: { "Accept-Language": "es" } },
+        );
+        const data: NominatimResult[] = await res.json();
+        setResults(data);
+      } catch {
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+  };
+
+  const handleSelect = (result: NominatimResult) => {
+    const lng = parseFloat(result.lon);
+    const lat = parseFloat(result.lat);
+    const label = result.display_name.split(",")[0].trim();
+    map?.flyTo({ center: [lng, lat], zoom: 15, duration: 800 });
+    onSelect(lng, lat, label);
+  };
+
+  return (
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 w-80 max-w-[calc(100%-1rem)]">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          onFocus={() => results.length > 0 && setShowResults(true)}
+          placeholder="Buscar dirección…"
+          className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-border bg-popover/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+          style={{ fontFamily: "var(--font-sans)" }}
+          autoComplete="off"
+        />
+      </div>
+      {showResults && (results.length > 0 || isSearching) && (
+        <ul
+          className="mt-1 w-full bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-xl overflow-hidden text-xs"
+          style={{ fontFamily: "var(--font-sans)" }}
+        >
+          {isSearching && (
+            <li className="px-3 py-2 text-muted-foreground">Buscando…</li>
+          )}
+          {results.map((r) => (
+            <li
+              key={r.place_id}
+              className="px-3 py-2 cursor-pointer hover:bg-accent truncate"
+              onMouseDown={() => handleSelect(r)}
+            >
+              {r.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ── Componente principal ──
 
 export function DashboardHome() {
   const [userLocation, setUserLocation] = useState<{ longitude: number; latitude: number } | null>(null);
   const [selectedPin, setSelectedPin] = useState<SelectedPin | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleMapClick = async ({ lng, lat }: { lng: number; lat: number }) => {
     setSelectedPin({ lng, lat, label: null, loading: true });
@@ -122,6 +220,16 @@ export function DashboardHome() {
         className="h-full w-full"
         attributionControl={false}
       >
+        {/* Overlay de búsqueda */}
+        {searchOpen && (
+          <MapSearchOverlay
+            onSelect={(lng, lat, label) => {
+              setSelectedPin({ lng, lat, label, loading: false });
+              setSearchOpen(false);
+            }}
+          />
+        )}
+
         {/* Captura clics en el mapa */}
         <MapClickHandler onClick={handleMapClick} />
 
@@ -187,11 +295,13 @@ export function DashboardHome() {
         {/* Controles */}
         <MapControls
           position="bottom-right"
+          showSearch
           showZoom
           showCompass
           showLocate
           showFullscreen
           onLocate={setUserLocation}
+          onSearchToggle={() => setSearchOpen((prev) => !prev)}
         />
       </Map>
     </div>

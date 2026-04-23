@@ -1,7 +1,9 @@
 /* Vista Home del dashboard — mapa interactivo con ruta demo, controles y búsqueda de dirección.
-   Selección por clic o búsqueda Nominatim: marcador pin y popup con nombre de calle y coords. */
+   Selección por clic o búsqueda Nominatim: marcador pin y popup con nombre de calle y coords.
+   Recibe paradas persistidas del Dashboard y las pinta como marcadores permanentes en el mapa. */
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
+import type { Parada } from "@/components/Dashboard";
 import {
   Map,
   MapControls,
@@ -56,6 +58,16 @@ function SelectedPinMarker() {
   return (
     <div className="flex items-center justify-center size-5 rounded-full bg-white border-2 border-[#ff5e00] shadow-lg">
       <div className="size-2 rounded-full bg-[#ff5e00]" />
+    </div>
+  );
+}
+
+// ── Marcador de parada agregada — numerado, color verde ──
+
+function ParadaMarker({ index }: { index: number }) {
+  return (
+    <div className="flex items-center justify-center size-6 rounded-full bg-emerald-500 border-2 border-white shadow-lg text-white text-[0.6rem] font-bold">
+      {index + 1}
     </div>
   );
 }
@@ -189,7 +201,12 @@ function MapSearchOverlay({ onSelect }: {
 
 // ── Componente principal ──
 
-export function DashboardHome() {
+export interface DashboardHomeProps {
+  paradas: Parada[];
+  onAgregarParada: (p: Parada) => void;
+}
+
+export function DashboardHome({ paradas, onAgregarParada }: DashboardHomeProps) {
   const [userLocation, setUserLocation] = useState<{ longitude: number; latitude: number } | null>(null);
   const [selectedPin, setSelectedPin] = useState<SelectedPin | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -251,6 +268,16 @@ export function DashboardHome() {
           </MapMarker>
         ))}
 
+        {/* Paradas agregadas — marcadores verdes numerados, persisten en sesión */}
+        {paradas.map((parada, i) => (
+          <MapMarker key={parada.id} longitude={parada.lng} latitude={parada.lat}>
+            <MarkerContent>
+              <ParadaMarker index={i} />
+            </MarkerContent>
+            <MarkerTooltip>{parada.label}</MarkerTooltip>
+          </MapMarker>
+        ))}
+
         {/* Marcador ubicación actual */}
         {userLocation && (
           <MapMarker longitude={userLocation.longitude} latitude={userLocation.latitude}>
@@ -291,7 +318,15 @@ export function DashboardHome() {
                 </div>
                 <button
                   className="w-full text-[0.7rem] font-medium py-1 px-2 rounded-md bg-[#ff5e00] hover:bg-[#e55500] text-white transition-colors"
-                  onClick={() => {/* TODO: agregar parada */}}
+                  onClick={() => {
+                    onAgregarParada({
+                      id: crypto.randomUUID(),
+                      lng: selectedPin.lng,
+                      lat: selectedPin.lat,
+                      label: selectedPin.label ?? "Ubicación seleccionada",
+                    });
+                    setSelectedPin(null);
+                  }}
                 >
                   Agregar Parada
                 </button>

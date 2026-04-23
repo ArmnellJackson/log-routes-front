@@ -1,5 +1,6 @@
 /* Dashboard principal — pantalla completa (fixed inset-0) que cubre Navbar y Footer.
-   Sidebar shadcn: Header con logo, sección Home y Ruta, Footer con usuario mock + dropdown. */
+   Sidebar shadcn: Header con logo, sección Home y Ruta, Footer con usuario mock + dropdown.
+   Gestiona estado de paradas (sessionStorage) y lo pasa a DashboardHome y ModalRutas. */
 import * as React from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Logout01Icon, ArrowUpDownIcon } from "@hugeicons/core-free-icons";
@@ -26,6 +27,17 @@ import {
 import { cn } from "@/lib/utils";
 import { DashboardHome } from "@/components/DashboardHome";
 import { ModalRutas } from "@/components/ModalRutas";
+
+// ── Tipo compartido: parada de ruta ──
+
+export interface Parada {
+  id: string;
+  lng: number;
+  lat: number;
+  label: string;
+}
+
+const SESSION_KEY = "log-routes-paradas";
 
 // ── Usuario mock ──
 
@@ -228,6 +240,21 @@ export interface DashboardProps {
 export function Dashboard({ onExit }: DashboardProps) {
   const [rutaDialogOpen, setRutaDialogOpen] = React.useState(false);
 
+  // Paradas persistidas en sessionStorage (sobreviven navegación, no recarga)
+  const [paradas, setParadas] = React.useState<Parada[]>(() => {
+    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "[]"); } catch { return []; }
+  });
+
+  React.useEffect(() => {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(paradas));
+  }, [paradas]);
+
+  const handleAgregarParada = (p: Parada) =>
+    setParadas((prev) => [...prev, p]);
+
+  const handleRemoveParada = (id: string) =>
+    setParadas((prev) => prev.filter((p) => p.id !== id));
+
   return (
     <div className="fixed inset-0 z-50 bg-background">
       <SidebarProvider defaultOpen={false} className="dashboard-overlay">
@@ -240,12 +267,18 @@ export function Dashboard({ onExit }: DashboardProps) {
           {/* Backdrop — clic fuera del sidebar lo cierra */}
           <SidebarBackdrop />
 
-          <DashboardHome />
+          <DashboardHome paradas={paradas} onAgregarParada={handleAgregarParada} />
         </SidebarInset>
       </SidebarProvider>
 
       {/* Modal a nivel raíz del Dashboard — evita anidamiento en SidebarInset/Map */}
-      {rutaDialogOpen && <ModalRutas onClose={() => setRutaDialogOpen(false)} />}
+      {rutaDialogOpen && (
+        <ModalRutas
+          paradas={paradas}
+          onRemoveParada={handleRemoveParada}
+          onClose={() => setRutaDialogOpen(false)}
+        />
+      )}
     </div>
   );
 }

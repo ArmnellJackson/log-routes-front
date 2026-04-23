@@ -14,7 +14,9 @@
       "Bash(pnpm dlx *)",
       "Bash(pnpm build *)",
       "Bash(pnpm exec *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(npx tsc *)",
+      "Bash(pnpm run *)"
     ]
   }
 }
